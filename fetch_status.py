@@ -39,3 +39,31 @@ elif response.status_code == 429:
 else:
     print(f"ERROR: Unexpected status code {response.status_code}")
     print(response.text)
+
+# Area Information
+area_id = "za_gt_jhb_fourways_4pef" #hardcoded for now
+area_url = "https://developer.sepush.co.za/business/3.1/area"
+area_params = {"id": area_id}
+
+area_response = requests.get(area_url, headers=headers, params=area_params)
+
+if area_response.status_code == 200:
+    area_data = area_response.json()
+    print(area_data)
+
+    area_filename = f"data/raw/area_{area_id}_{timestamp}.json"
+    with open(area_filename, "w") as f:
+        json.dump(area_data, f, indent=2)
+
+    print("Saved to", area_filename)
+
+elif area_response.status_code == 401:
+    print("ERROR: Unauthorized on area request. Check token.")
+
+elif area_response.status_code == 429:
+    print("ERROR: API quota exhausted for today.")
+    print("Quota resets at:", area_response.headers.get("x-ratelimit-reset"))
+
+else:
+    print(f"ERROR: Unexpected status code {area_response.status_code}")
+    print(area_response.text)
