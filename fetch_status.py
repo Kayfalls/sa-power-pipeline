@@ -67,3 +67,34 @@ elif area_response.status_code == 429:
 else:
     print(f"ERROR: Unexpected status code {area_response.status_code}")
     print(area_response.text)
+
+# --- Schedule Information ---
+schedule_id = "eske-XX" # replace later with a real id from my area_*.json schedules list
+schedule_url = "https://developer.sepush.co.za/business/3.1/schedule"
+schedule_params = {"id": schedule_id}
+
+schedule_response = requests.get(schedule_url, headers=headers, params=schedule_params)
+
+if schedule_response.status_code == 200:
+    schedule_data = schedule_response.json()
+    print(schedule_data)
+
+    schedule_filename = f"data/raw/schedule_{schedule_id}_{timestamp}.json"
+    with open(schedule_filename, "w") as f:
+        json.dump(schedule_data, f, indent=2)
+
+    print("saved to", schedule_filename)
+
+elif schedule_response.status_code == 401:
+    print("ERROR: Unauthorised on schedule request. Check token.")
+
+elif schedule_response.status_code == 429:
+    print("ERROR: API quota exhausted for today.")
+    print("Quota resets at:", schedule_response.headers.get("x-ratelimit-reset"))
+
+elif schedule_response.status_code == 400:
+    print("ERROR: Invalid schedule ID format - schedule IDs use hyphens, not underscores.")
+
+else:
+    print(f"ERROR: Unexpected status code {schedule_response.status_code}")
+    print(schedule_response.text)
