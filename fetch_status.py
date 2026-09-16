@@ -6,95 +6,67 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-token = os.getenv("ESKOMSEPUSH_TOKEN")
+TOKEN = os.getenv("ESKOMSEPUSH_TOKEN")
+HEADERS = {"token": TOKEN}
 
-url = "https://developer.sepush.co.za/business/3.1/status"
-headers = {"token": token}
+BASE_URL = "https://developer.sepush.co.za/business/3.1"
 
-response = requests.get(url, headers=headers)
+AREA_ID = "za_gt_jhb_fourways_4pef"
+SCHEDULE_ID = "eskde-10" #From iteration 5/6
 
-if response.status_code == 200:
-    data = response.json()
-    print(data)
-    print("Quota remaining:", response.headers.get("x-ratelimit-remaining"))
-    print("Quota resets at:", response.headers.get("x-ratetime-reset"))
-    
+
+def save_json(data, filename):
     os.makedirs("data/raw", exist_ok=True)
-
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    filename = f"data/raw/status_{timestamp}.json"
-
-    with open(filename, "w") as f:
+    filepath = f"data/raw/{filename}"
+    with open(filepath, "w") as f:
         json.dump(data, f, indent=2)
+    print("Saved to", filepath)
 
-    print("Saved to", filename)
 
-elif response.status_code == 401:
-    print("ERROR: Unauthorized. Check that ESKOMSEPUSH_TOKEN is set correctly in .env")
+def handle_response(response, label):
+    if response.status_code == 200:
+        data = response.json()
+        print(data)
+        print("Quota remaining:", response.headers.get("x-ratelimit-remaining"))
+        return data
+    elif response.status_code == 401:
+        print(f"ERROR ({label}): Unauthorised. Check ESKOMSEPUSH_TOKEN in .env")
+    elif response.status_code == 429:
+        print(f"ERROR ({label}): API quota exhausted for today.")
+        print("Quota resets at:", response.headers.get("x-ratelimit-reset"))
+    elif response.status_code == 400:
+        print(f"ERROR ({label}): Bad request - Check ID format.")
+    else:
+        print(f"ERROR ({label}): Unexpected status code {response.status_code}")
+        print(response.text)
+    return None
 
-elif response.status_code == 429:
-    print("ERROR: API quota exhausted for today.")
-    print("Quota resets at:", response.headers.get("x-ratelimit-reset"))
+def fetch_status(timestamp):
+    response = requests.get(f"{BASE_URL}/status", headers=HEADERS)
+    data = handle_response(response, "status")
+    if data:
+        save_json(data, f"status_{timestamp}.json")
+    return data
 
-else:
-    print(f"ERROR: Unexpected status code {response.status_code}")
-    print(response.text)
+def fetch_area(area_id, timestamp):
+    response = requests.get(f"{BASE_URL}/area", headers=HEADERS, params={"id": area_id})
+    data = handle_response(response, "area")
+    if data:
+        save_json(data, f"area_{area_id}_{timestamp}.json")
+    return data
 
-# Area Information
-area_id = "za_gt_jhb_fourways_4pef" #hardcoded for now
-area_url = "https://developer.sepush.co.za/business/3.1/area"
-area_params = {"id": area_id}
+def fetch_schedule(schedule_id, timestamp):
+    response = requests.get(f"{BASE_URL}/schedule", headers=HEADERS, params={"id": schedule_id})
+    data = handle_response(response, "schedule")
+    if data:
+        save_json(data, f"schedule_{schedule_id}_{timestamp}.json")
+    return data
 
-area_response = requests.get(area_url, headers=headers, params=area_params)
+def main():
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    fetch_status(timestamp)
+    fetch_area(AREA_ID, timestamp)
+    fetch_schedule(SCHEDULE_ID, timestamp)
 
-if area_response.status_code == 200:
-    area_data = area_response.json()
-    print(area_data)
-
-    area_filename = f"data/raw/area_{area_id}_{timestamp}.json"
-    with open(area_filename, "w") as f:
-        json.dump(area_data, f, indent=2)
-
-    print("Saved to", area_filename)
-
-elif area_response.status_code == 401:
-    print("ERROR: Unauthorized on area request. Check token.")
-
-elif area_response.status_code == 429:
-    print("ERROR: API quota exhausted for today.")
-    print("Quota resets at:", area_response.headers.get("x-ratelimit-reset"))
-
-else:
-    print(f"ERROR: Unexpected status code {area_response.status_code}")
-    print(area_response.text)
-
-# --- Schedule Information ---
-schedule_id = "eske-XX" # replace later with a real id from my area_*.json schedules list
-schedule_url = "https://developer.sepush.co.za/business/3.1/schedule"
-schedule_params = {"id": schedule_id}
-
-schedule_response = requests.get(schedule_url, headers=headers, params=schedule_params)
-
-if schedule_response.status_code == 200:
-    schedule_data = schedule_response.json()
-    print(schedule_data)
-
-    schedule_filename = f"data/raw/schedule_{schedule_id}_{timestamp}.json"
-    with open(schedule_filename, "w") as f:
-        json.dump(schedule_data, f, indent=2)
-
-    print("saved to", schedule_filename)
-
-elif schedule_response.status_code == 401:
-    print("ERROR: Unauthorised on schedule request. Check token.")
-
-elif schedule_response.status_code == 429:
-    print("ERROR: API quota exhausted for today.")
-    print("Quota resets at:", schedule_response.headers.get("x-ratelimit-reset"))
-
-elif schedule_response.status_code == 400:
-    print("ERROR: Invalid schedule ID format - schedule IDs use hyphens, not underscores.")
-
-else:
-    print(f"ERROR: Unexpected status code {schedule_response.status_code}")
-    print(schedule_response.text)
+if __name__ == "__main__":
+    main()
