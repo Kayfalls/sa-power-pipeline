@@ -31,3 +31,5 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 Note to self:
 remember to activate the environment: 
         'source .venv/bin/activate'
+
+Verification code: WTC-QNYTS8NT
