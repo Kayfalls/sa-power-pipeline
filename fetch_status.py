@@ -1,3 +1,4 @@
+import logging
 import requests
 import os
 import json
@@ -5,6 +6,13 @@ from datetime import datetime,timezone
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 TOKEN = os.getenv("ESKOMSEPUSH_TOKEN")
 HEADERS = {"token": TOKEN}
@@ -20,25 +28,25 @@ def save_json(data, filename):
     filepath = f"data/raw/{filename}"
     with open(filepath, "w") as f:
         json.dump(data, f, indent=2)
-    print("Saved to", filepath)
+    print("Saved to %s", filepath)
 
 
 def handle_response(response, label):
     if response.status_code == 200:
         data = response.json()
-        print(data)
-        print("Quota remaining:", response.headers.get("x-ratelimit-remaining"))
+        logger.info("%s: success", label)
+        logger.info("Quota remaining: %s", response.headers.get("x-ratelimit-remaining"))
         return data
     elif response.status_code == 401:
-        print(f"ERROR ({label}): Unauthorised. Check ESKOMSEPUSH_TOKEN in .env")
+        logger.error("%s: Unauthorised. Check ESKOMSEPUSH_TOKEN in .env", label)
     elif response.status_code == 429:
-        print(f"ERROR ({label}): API quota exhausted for today.")
-        print("Quota resets at:", response.headers.get("x-ratelimit-reset"))
+        logger.warning("%s: API quota exhausted for today.", label)
+        logger.warning("Quota resets at: %s", response.headers.get("x-ratelimit-reset"))
     elif response.status_code == 400:
-        print(f"ERROR ({label}): Bad request - Check ID format.")
+        logger.error("%s: Bad request - Check ID format.", label)
     else:
-        print(f"ERROR ({label}): Unexpected status code {response.status_code}")
-        print(response.text)
+        logger.error("%s: Unexpected status code %s", label, response.status_code)
+        logger.error(response.text)
     return None
 
 def fetch_status(timestamp):
@@ -64,9 +72,11 @@ def fetch_schedule(schedule_id, timestamp):
 
 def main():
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    logger.info("Starting pipeline run: %s", timestamp)
     fetch_status(timestamp)
     fetch_area(AREA_ID, timestamp)
     fetch_schedule(SCHEDULE_ID, timestamp)
+    logger.info("Pipeline run complete: %s", timestamp)
 
 if __name__ == "__main__":
     main()

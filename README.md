@@ -15,7 +15,8 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 
 ### Phase 2: Add discipline
 - [x] Iteration 7: Refactored into functions ('fetch_status', 'fetch_area', 'fetch_schedule', 'main')
-- [] Iteration 8: TBD
+- [x] Iteration 8: Structured logging (INFO/WARNING/ERROR levels, timestamps)
+- []  Iteration 9: TBD
 
 ## Setup
 1. Copy `.env.example` to `.env` and add your EskomSePush API token
