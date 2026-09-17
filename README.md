@@ -18,7 +18,10 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 8: Structured logging (INFO/WARNING/ERROR levels, timestamps)
 - [x] Iteration 9: First unit tests (pytest, mocked responses, no live API calls)
 - [x] Iteration 10: Proper src/ package layout, installable via pyproject.toml
-- [ ] Iteration 11: TBD
+- [x] Iteration 11: GitHub Actions CI (ruff lint + pytest on every push)
+- [ ] Iteration 12: TBD
+
+![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
 ## Setup
 1. Copy `.env.example` to `.env` and add your EskomSePush API token
