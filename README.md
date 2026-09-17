@@ -2,7 +2,7 @@
 
 A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
 
-**Status:** 🚧 Iteration 13 — first Bigquery load (manual GCP setup + raw JSON load)
+**Status:** 🚧 Iteration 14 — NDJSON format fix, load all three endpoints into separate raw tables
 
 ## Roadmap
 ### Phase 1: Get data moving
@@ -23,7 +23,8 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 
 ### Phase 3: Real warehouse (BigQuery + dbt)
 - [x] Iteration 13: GCP project  service account setup, first raw JSON load into BigQuery
-- [ ] Iteration 14: TBD
+- [x] Iteration 14: NDJSON format, generalized loader for status/area/schedule tables
+- [ ] Iteration 15: TBD
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 

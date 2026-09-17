@@ -24,11 +24,11 @@ HEADERS: dict[str, str] = {"token": ESKOMSEPUSH_TOKEN or ""}
 
 
 def save_json(data: dict[str, Any], filename: str) -> None:
-    """Write a dict to data/raw/<filename> as indented JSON. """
+    """Write a dict to data/raw/<filename> as a single-line NDJSON record. """
     os.makedirs(RAW_DATA_DIR, exist_ok=True)
     filepath = f"{RAW_DATA_DIR}/{filename}"
     with open(filepath, "w") as f:
-        json.dump(data, f, indent=2)
+        f.write(json.dumps(data) + "\n")
     logger.info("Saved to %s", filepath)
 
 

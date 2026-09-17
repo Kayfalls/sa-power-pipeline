@@ -1,10 +1,13 @@
-"""Load raw JSON files from data/raw/ into BigQuery.
+"""Load raw NDJSON files from data/raw/ into BigQuery.
 
-This is intentiionally simple: read a local JSON file, load it into
-a BigQuery table with schema autodetect. No transformation happens
-here -that's dbt's job, starting in a later iteration.
+Table name is derived from filename prefix:
+    status_*.json -> raw.status
+    area_*.json -> raw.area
+    schedule_*.json -> raw.schedule
 """
+from sa_power_pipeline.config import RAW_DATA_DIR
 import os
+import glob
 import logging
 from google.cloud import bigquery
 from dotenv import load_dotenv
@@ -21,12 +24,24 @@ logger = logging.getLogger(__name__)
 
 PROJECT_ID = os.getenv("GCP_PROJECT_ID")
 DATASET = "raw"
+RAW_DATA_DIR = "data/raw" 
+
+def table_name_for_file(filepath: str) -> str:
+    """Derive a BigQuery table name from a raw filename's prefix. """
+    filename = os.path.basename(filepath)
+    if filename.startswith("status_"):
+        return "status"
+    elif filename.startswith("area_"):
+        return "area"
+    elif filename.startswith("schedule_"):
+        return "schedule"
+    else:
+        raise ValueError(f"Unrecognized file prefix: {filename}")
 
 
 
-def load_json_file_to_bq(filepath:str, table_name:str) -> None:
+def load_json_file_to_bq(client: bigquery.Client, filepath: str, table_name: str) -> None:
     """Load a single local JSON file into a BigQuery table, autodetecting schema. """
-    client = bigquery.Client(project=PROJECT_ID)
     table_id = f"{PROJECT_ID}.{DATASET}.{table_name}"
     
     job_config = bigquery.LoadJobConfig(
@@ -41,7 +56,21 @@ def load_json_file_to_bq(filepath:str, table_name:str) -> None:
     load_job.result() #waits for the job to finish
     logger.info("Loaded %s into %s", filepath, table_id)
 
-if __name__ == '__main__':
+def load_all_raw_files() -> None:
+    """Load every NDJSON file in data/raw/ into its matching BigQuery table."""
+    client = bigquery.Client(project=PROJECT_ID)
+    filepaths = glob.glob(f"{RAW_DATA_DIR}/*.json")
 
-    #Manual test: point this at one real file from data/raw/ to confirm the setup works
-    load_json_file_to_bq("data/raw/status_20260905T081009Z.json", "status_test")
+    if not filepaths:
+        logger.warning("No files found in %s", RAW_DATA_DIR)
+        return
+
+    for filepath in filepaths:
+        try:
+            table_name = table_name_for_file(filepath)
+            load_json_file_to_bq(client, filepath, table_name)
+        except ValueError as e:
+            logger.warning(str(e))
+
+if __name__ == '__main__':
+    load_all_raw_files()
