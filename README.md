@@ -16,13 +16,16 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 ### Phase 2: Add discipline
 - [x] Iteration 7: Refactored into functions ('fetch_status', 'fetch_area', 'fetch_schedule', 'main')
 - [x] Iteration 8: Structured logging (INFO/WARNING/ERROR levels, timestamps)
-- [x]  Iteration 9: First unit tests (pytest, mocked responses, no live API calls)
-- [ ] Iteration 10: TBD
+- [x] Iteration 9: First unit tests (pytest, mocked responses, no live API calls)
+- [x] Iteration 10: Proper src/ package layout, installable via pyproject.toml
+- [ ] Iteration 11: TBD
 
 ## Setup
 1. Copy `.env.example` to `.env` and add your EskomSePush API token
 2. `pip install -r requirements.txt`
-3. `python fetch_status.py`
+3. 'pip install -e .'
+4. 'python src/sa_power_pipeline/fetch_status.py'
+
 
 ## Running tests
 1. 'pip install -r requirements-dev.txt'

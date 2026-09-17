@@ -1,5 +1,5 @@
 from unittest.mock import Mock
-from fetch_status import handle_response
+from sa_power_pipeline.fetch_status import handle_response
 
 def make_response(status_code, json_data=None, headers=None):
     response = Mock()
