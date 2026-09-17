@@ -24,7 +24,8 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 ### Phase 3: Real warehouse (BigQuery + dbt)
 - [x] Iteration 13: GCP project  service account setup, first raw JSON load into BigQuery
 - [x] Iteration 14: NDJSON format, generalized loader for status/area/schedule tables
-- [ ] Iteration 15: TBD
+- [x] Iteration 15: Combined extract + load into one 'run_pipeline.py' entrypoint
+- [ ] Iteration 16: TBD
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
