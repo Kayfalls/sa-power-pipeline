@@ -4,6 +4,7 @@ with source as (
 
 flattened as (
     select
+    extracted_at,
         'eskom' as region,
         status.eskom.name as region_name,
         status.eskom.stage as stage,
@@ -14,6 +15,7 @@ flattened as (
     union all
 
     select
+    extracted_at,
         'capetown' as region,
         status.capetown.name as region_name,
         status.capetown.stage as stage,
