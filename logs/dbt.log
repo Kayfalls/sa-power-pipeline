@@ -1,0 +1,57 @@
+[0m12:54:04.487815 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7e6781792db0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7e678239be30>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7e67839fd160>]}
+
+
+============================== 12:54:04.495050 | c7635dee-eca2-4e39-a6ca-afb303c61d86 ==============================
+[0m12:54:04.495050 [info ] [MainThread]: Running with dbt=1.12.5
+[0m12:54:04.496160 [debug] [MainThread]: running dbt with arguments {'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'use_colors': 'True', 'empty': 'None', 'hints_enabled': 'True', 'profiles_dir': '/home/kabelo/.dbt', 'no_print': 'None', 'fail_fast': 'False', 'log_cache_events': 'False', 'warn_error': 'None', 'maximum_seed_size_mib': '1', 'quiet': 'False', 'cache_selected_only': 'False', 'indirect_selection': 'eager', 'log_format': 'default', 'log_path': 'logs', 'invocation_command': 'dbt init sa_power_dbt', 'partial_parse': 'True', 'target_path': 'None', 'introspect': 'True', 'send_anonymous_usage_stats': 'True', 'version_check': 'True', 'static_parser': 'True', 'use_experimental_parser': 'False', 'printer_width': '80', 'write_json': 'True', 'debug': 'False'}
+[0m12:54:04.525391 [info ] [MainThread]: Creating dbt configuration folder at /home/kabelo/.dbt
+[0m12:54:04.531065 [debug] [MainThread]: Starter project path: /home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/dbt/include/starter_project
+[0m12:54:04.535281 [info ] [MainThread]: Setting up your profile.
+[0m12:58:01.543352 [error] [MainThread]: [[31mERROR[0m]: Encountered an error:
+
+[0m12:58:01.548597 [error] [MainThread]: Traceback (most recent call last):
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/dbt/cli/requires.py", line 198, in wrapper
+    result, success = func(*args, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/dbt/cli/requires.py", line 144, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/dbt/cli/main.py", line 504, in init
+    results = task.run()
+              ^^^^^^^^^^
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/dbt/task/init.py", line 363, in run
+    self.setup_profile(profile_name)
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/dbt/task/init.py", line 265, in setup_profile
+    self.create_profile_from_target(adapter, profile_name=profile_name)
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/dbt/task/init.py", line 182, in create_profile_from_target
+    self.create_profile_from_profile_template(profile_template, profile_name)
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/dbt/task/init.py", line 166, in create_profile_from_profile_template
+    target = self.generate_target_from_input(prompts, initial_target)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/dbt/task/init.py", line 132, in generate_target_from_input
+    target[key] = click.prompt(
+                  ^^^^^^^^^^^^^
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/click/termui.py", line 262, in prompt
+    value = prompt_func(prompt)
+            ^^^^^^^^^^^^^^^^^^^
+  File "/home/kabelo/Documents/PROJECTS/sa-power-pipeline/.venv/lib/python3.12/site-packages/click/termui.py", line 245, in prompt_func
+    raise Abort() from None
+click.exceptions.Abort
+
+[0m12:58:01.553867 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": false, "command_wall_clock_time": 237.19743, "process_in_blocks": "236352", "process_kernel_time": 0.568969, "process_mem_max_rss": "210512", "process_out_blocks": "360", "process_user_time": 3.800403}
+[0m12:58:01.559378 [debug] [MainThread]: Command `dbt init` failed at 12:58:01.558628 after 237.20 seconds
+[0m12:58:01.561907 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7e6783959910>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7e6767849ca0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7e6766be5670>]}
+[0m12:58:01.563884 [debug] [MainThread]: Flushing usage events
+[0m12:58:03.336422 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m12:58:09.447947 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72ec7e599220>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72ec7e5991f0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72ec7e599190>]}
+
+
+============================== 12:58:09.451951 | ae17743c-8a77-4f57-9a42-9ec138cc254c ==============================
+[0m12:58:09.451951 [info ] [MainThread]: Running with dbt=1.12.5
+[0m12:58:09.453037 [debug] [MainThread]: running dbt with arguments {'log_format': 'default', 'no_print': 'None', 'log_path': 'logs', 'use_experimental_parser': 'False', 'partial_parse': 'True', 'quiet': 'False', 'log_cache_events': 'False', 'fail_fast': 'False', 'static_parser': 'True', 'invocation_command': 'dbt init sa_power_dbt', 'send_anonymous_usage_stats': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'debug': 'False', 'warn_error': 'None', 'write_json': 'True', 'indirect_selection': 'eager', 'printer_width': '80', 'profiles_dir': '/home/kabelo/.dbt', 'use_colors': 'True', 'maximum_seed_size_mib': '1', 'empty': 'None', 'introspect': 'True', 'cache_selected_only': 'False', 'target_path': 'None', 'hints_enabled': 'True', 'version_check': 'True'}
+[0m12:58:09.472332 [info ] [MainThread]: A project called sa_power_dbt already exists here.
+[0m12:58:09.474106 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 0.13991427, "process_in_blocks": "0", "process_kernel_time": 0.154457, "process_mem_max_rss": "106144", "process_out_blocks": "0", "process_user_time": 2.116265}
+[0m12:58:09.474951 [debug] [MainThread]: Command `dbt init` succeeded at 12:58:09.474804 after 0.14 seconds
+[0m12:58:09.475676 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72ec7ec2db20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72ec821b3b30>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72ec7dc550a0>]}
+[0m12:58:09.476302 [debug] [MainThread]: Flushing usage events
+[0m12:58:10.810981 [debug] [MainThread]: An error was encountered while trying to flush usage events
