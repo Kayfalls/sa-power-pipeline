@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_status
+    description: One row per municipality, flattened from the nested raw status record.
+    columns:
+      - name: region
+        description: Municipality/region key (e.g. eskom, capetown)
+        tests:
+          - not_null
+      - name: stage
+        description: Current loadshedding stage as a string
+        tests:
+          - not_null
