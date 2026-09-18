@@ -48,6 +48,7 @@ def load_json_file_to_bq(client: bigquery.Client, filepath: str, table_name: str
         source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
         autodetect=True,
         write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+        schema_update_options=[bigquery.SchemaUpdateOption.ALLOW_FIELD_ADDITION],
     )
 
     with open(filepath, "rb") as f:

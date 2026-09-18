@@ -56,6 +56,7 @@ def fetch_status(timestamp: str) -> dict[str, Any] | None:
     response = requests.get(f"{BASE_URL}/status", headers=HEADERS)
     data = handle_response(response, "status")
     if data:
+        data["extracted_at"] = timestamp
         save_json(data, f"status_{timestamp}.json")
     return data
 
@@ -64,6 +65,7 @@ def fetch_area(area_id: str, timestamp:str) -> dict[str, Any] | None:
     response = requests.get(f"{BASE_URL}/area", headers=HEADERS, params={"id": area_id})
     data = handle_response(response, "area")
     if data:
+        data["extracted_at"] = timestamp
         save_json(data, f"area_{area_id}_{timestamp}.json")
     return data
 
@@ -72,6 +74,7 @@ def fetch_schedule(schedule_id: str, timestamp: str) -> dict[str, Any] | None:
     response = requests.get(f"{BASE_URL}/schedule", headers=HEADERS, params={"id": schedule_id})
     data = handle_response(response, "schedule")
     if data:
+        data["extracted_at"] = timestamp
         save_json(data, f"schedule_{schedule_id}_{timestamp}.json")
     return data
 
