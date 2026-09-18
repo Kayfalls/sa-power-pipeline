@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: mart_current_status
+    description: The single most recent load shedding status per region, deduplicated by extracted_at.
+    columns:
+      - name: region
+        description: Municipality/region key
+        tests:
+          - not_null
+          - unique
+      - name: stage
+        description: Current load shedding stage
+        tests:
+          - not_null
