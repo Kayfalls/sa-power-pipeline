@@ -31,12 +31,18 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 19: mart_current_status model, unique/not_null tests, dbt docs
 
 ### Phase 4: Orchestrate + containerize
-- [ ] Iteration 20: TBD
+- [x] Iteration 20: First Airflow DAG, daily schedule, manual trigger verified
+- [ ] Iteration 21: TBD
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
 ## Data flow
 EskomSePush API → raw JSON (NDJSON) → BigQuery `raw` dataset → dbt staging (`stg_status`) → dbt mart (`mart_current_status`)
+
+## Airflow
+1. 'export AIRFLOW_HOME=~/airflow'
+2. 'airflow webserver --port 8000' and 'airflow scheduler' (separate terminals)
+3. DAG: 'sa_power_pipeline', scheduled daiy
 
 ## Environments
 This project uses two separate virtual environments due to dependency conflicts between Airflow and dbt:
