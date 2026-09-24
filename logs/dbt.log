@@ -55,3 +55,35 @@ click.exceptions.Abort
 [0m12:58:09.475676 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72ec7ec2db20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72ec821b3b30>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x72ec7dc550a0>]}
 [0m12:58:09.476302 [debug] [MainThread]: Flushing usage events
 [0m12:58:10.810981 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m12:12:58.762480 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7615c4227980>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7615c37ef6b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7615c3789a60>]}
+
+
+============================== 12:12:58.776516 | a046919b-c065-4caa-9b97-8ac460188e97 ==============================
+[0m12:12:58.776516 [info ] [MainThread]: Running with dbt=1.12.5
+[0m12:12:58.777946 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'fail_fast': 'False', 'log_path': 'logs', 'maximum_seed_size_mib': '1', 'no_print': 'None', 'quiet': 'False', 'profiles_dir': '/home/kabelo/.dbt', 'indirect_selection': 'eager', 'empty': 'None', 'send_anonymous_usage_stats': 'True', 'use_colors': 'True', 'partial_parse': 'True', 'target_path': 'None', 'hints_enabled': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'write_json': 'True', 'debug': 'False', 'log_cache_events': 'False', 'introspect': 'True', 'version_check': 'True', 'log_format': 'default', 'cache_selected_only': 'False', 'use_experimental_parser': 'False', 'warn_error': 'None', 'static_parser': 'True', 'invocation_command': 'dbt docs generate'}
+[0m12:12:58.779344 [error] [MainThread]: [[31mERROR[0m]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/kabelo/Documents/PROJECTS/sa-power-pipeline/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m12:12:58.783958 [debug] [MainThread]: Resource report: {"command_name": "generate", "command_success": false, "command_wall_clock_time": 0.19375572, "process_in_blocks": "44392", "process_kernel_time": 0.348847, "process_mem_max_rss": "106220", "process_out_blocks": "16", "process_user_time": 3.266125}
+[0m12:12:58.786146 [debug] [MainThread]: Command `dbt docs generate` failed at 12:12:58.785878 after 0.20 seconds
+[0m12:12:58.787246 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7615c4227980>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7615c7b3fb30>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7615c38c0140>]}
+[0m12:12:58.788467 [debug] [MainThread]: Flushing usage events
+[0m12:13:00.058229 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m14:01:12.656378 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x74564582b830>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x745644790a10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x745642d7dbe0>]}
+
+
+============================== 14:01:12.666300 | 961f12bb-706e-4c17-90cb-7b702bbde422 ==============================
+[0m14:01:12.666300 [info ] [MainThread]: Running with dbt=1.12.5
+[0m14:01:12.667596 [debug] [MainThread]: running dbt with arguments {'debug': 'False', 'log_path': 'logs', 'printer_width': '80', 'warn_error': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'log_cache_events': 'False', 'use_experimental_parser': 'False', 'hints_enabled': 'True', 'maximum_seed_size_mib': '1', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'profiles_dir': '/home/kabelo/.dbt', 'no_print': 'None', 'target_path': 'None', 'use_colors': 'True', 'log_format': 'default', 'fail_fast': 'False', 'quiet': 'False', 'version_check': 'True', 'introspect': 'True', 'indirect_selection': 'eager', 'static_parser': 'True', 'cache_selected_only': 'False', 'invocation_command': 'dbt test --select mart_current_status', 'empty': 'None', 'write_json': 'True'}
+[0m14:01:12.668722 [error] [MainThread]: [[31mERROR[0m]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /home/kabelo/Documents/PROJECTS/sa-power-pipeline/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m14:01:12.671734 [debug] [MainThread]: Resource report: {"command_name": "test", "command_success": false, "command_wall_clock_time": 0.14816867, "process_in_blocks": "73648", "process_kernel_time": 0.372759, "process_mem_max_rss": "106220", "process_out_blocks": "8", "process_user_time": 3.032446}
+[0m14:01:12.673404 [debug] [MainThread]: Command `dbt test` failed at 14:01:12.673057 after 0.15 seconds
+[0m14:01:12.675588 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x745645b3d640>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x74564582b830>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x745641727f20>]}
+[0m14:01:12.677185 [debug] [MainThread]: Flushing usage events
+[0m14:01:14.449006 [debug] [MainThread]: An error was encountered while trying to flush usage events

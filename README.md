@@ -28,9 +28,20 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 16: dbt project initialized, connected to BigQuery
 - [x] Iteration 17: stg_status staging model + schema tests
 - [x] Iteration 18: extracted_at metadata, schema evolution handling
-- [ ] Iteration 19: TBD
+- [x] Iteration 19: mart_current_status model, unique/not_null tests, dbt docs
+
+### Phase 4: Orchestrate + containerize
+- [ ] Iteration 20: TBD
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
+
+## Data flow
+EskomSePush API → raw JSON (NDJSON) → BigQuery `raw` dataset → dbt staging (`stg_status`) → dbt mart (`mart_current_status`)
+
+## Environments
+This project uses two separate virtual environments due to dependency conflicts between Airflow and dbt:
+- `.venv` — pipeline code, dbt, testing, linting
+- `.venv-airflow` — Airflow only (also has the pipeline package installed via `pip install -e .` so DAGs can import it)
 
 ## Setup
 1. Copy `.env.example` to `.env` and add your EskomSePush API token, GCP project ID, and path to your GCP service account key.
