@@ -1,15 +1,16 @@
 """Airflow DAG for sa-power-pipeline.
 
-Runs the existing extract-then-load pipeline as a single task,
-once daily.This is the first orchestration pass - no retries or
-alerting yet, that's a later iteration.
+Splits extract and load into separate tasks so failures are 
+visible and retryable independently  - a BigQuery hiccup shouldn't
+force a re-run of the API extraction (and its quota cost).
 """
 
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from sa_power_pipeline.run_pipeline import run as run_pipeline
+from sa_power_pipeline.fetch_status import main as extract_task
+from sa_power_pipeline.load_bigquery import load_all_raw_files as load_task
 
 default_args = {
     "owner": "kabelo",
@@ -24,7 +25,14 @@ with DAG(
     tags=["sa-power-pipeline"],
 ) as dag:
 
-    run_pipeline_task = PythonOperator(
-        task_id="run_pipeline",
-        python_callable=run_pipeline,
+    extract = PythonOperator(
+        task_id="extract_from_eskomsepush",
+        python_callable=extract_task,
     )
+
+    load = PythonOperator(
+        task_id="load_to_bigquery",
+        python_callable=load_task,
+    )
+
+    extract >> load
