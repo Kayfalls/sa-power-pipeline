@@ -2,7 +2,7 @@
 
 A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
 
-**Status:** 🚧 Iteration 22 — retries (3x) and failure alerting on both tasks
+**Status:** 🚧 Iteration 23 — pipeline containerized with Docker
 
 ## Roadmap
 ### Phase 1: Get data moving
@@ -34,7 +34,8 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 20: First Airflow DAG, running in isolated venv, daily schedule, manual trigger verified
 - [x] Iteration 21: Split into extract_from_eskomsepush and load_to_bigquery tasks
 - [x] Iteration 22: Retries (3x, 2min delay) + failure alert callback
-- [ ] Iteration 23: TBD
+- [x] Iteration 23: Pipeline Dockerized (Dockerfile, .dockerignore)
+- [ ] Iteration 24: TBD (containerize Airflow itself)
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
@@ -57,6 +58,9 @@ This project uses two separate virtual environments due to dependency conflicts 
 3. 'pip install -e .'
 4. 'python src/sa_power_pipeline/fetch_status.py'
 
+## Docker
+1. 'docker build -t sa-power-pipeline .'
+2. 'docker run --rm --env-file .env -v /path/to/key.json:/app/credentials.json -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json sa-power-pipeline'
 
 ## Running tests
 1. 'pip install -r requirements-dev.txt'

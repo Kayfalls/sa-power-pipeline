@@ -1,0 +1,11 @@
+.venv/
+.venv-airflow/
+.git/
+data/
+*.pyc
+__pycache__/
+.env
+sa_power_dbt/target/
+sa_power_dbt/dbt_packages/
+sa_power_dbt/logs/
+tests/
