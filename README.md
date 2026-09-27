@@ -2,7 +2,7 @@
 
 A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
 
-**Status:** 🚧 Iteration 21 — split extract and load into separate Airflow tasks
+**Status:** 🚧 Iteration 22 — retries (3x) and failure alerting on both tasks
 
 ## Roadmap
 ### Phase 1: Get data moving
@@ -33,7 +33,8 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 ### Phase 4: Orchestrate + containerize
 - [x] Iteration 20: First Airflow DAG, running in isolated venv, daily schedule, manual trigger verified
 - [x] Iteration 21: Split into extract_from_eskomsepush and load_to_bigquery tasks
-- [ ] Iteration 22: TBD
+- [x] Iteration 22: Retries (3x, 2min delay) + failure alert callback
+- [ ] Iteration 23: TBD
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
