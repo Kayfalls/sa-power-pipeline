@@ -2,7 +2,7 @@
 
 A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
 
-**Status:** 🚧 Iteration 23 — pipeline containerized with Docker
+**Status:** 🚧 Iteration 24 — Airflow fully containerized via Docker Compose
 
 ## Roadmap
 ### Phase 1: Get data moving
@@ -35,17 +35,14 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 21: Split into extract_from_eskomsepush and load_to_bigquery tasks
 - [x] Iteration 22: Retries (3x, 2min delay) + failure alert callback
 - [x] Iteration 23: Pipeline Dockerized (Dockerfile, .dockerignore)
-- [ ] Iteration 24: TBD (containerize Airflow itself)
+- [x] Iteration 24: Airflow containerized (custom image, webserver, scheduler, Postgres via docker-compose)
+- [ ] Iteration 25: TBD
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
 ## Data flow
 EskomSePush API → raw JSON (NDJSON) → BigQuery `raw` dataset → dbt staging (`stg_status`) → dbt mart (`mart_current_status`)
 
-## Airflow
-1. 'export AIRFLOW_HOME=~/airflow'
-2. 'airflow webserver --port 8080' and 'airflow scheduler' (separate terminals)
-3. DAG: 'sa_power_pipeline', scheduled daiy
 
 ## Environments
 This project uses two separate virtual environments due to dependency conflicts between Airflow and dbt:
@@ -58,7 +55,12 @@ This project uses two separate virtual environments due to dependency conflicts 
 3. 'pip install -e .'
 4. 'python src/sa_power_pipeline/fetch_status.py'
 
-## Docker
+### Airflow
+1. 'export AIRFLOW_HOME=~/airflow'
+2. 'airflow webserver --port 8080' and 'airflow scheduler' (separate terminals)
+3. DAG: 'sa_power_pipeline', scheduled daiy
+
+### Docker
 1. 'docker build -t sa-power-pipeline .'
 2. 'docker run --rm --env-file .env -v /path/to/key.json:/app/credentials.json -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json sa-power-pipeline'
 
@@ -69,5 +71,6 @@ This project uses two separate virtual environments due to dependency conflicts 
 Note to self:
 remember to activate the environment: 
         'source .venv/bin/activate'
+
 
 Verification code: WTC-QNYTS8NT
