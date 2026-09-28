@@ -2,7 +2,7 @@
 
 A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
 
-**Status:** 🚧 Iteration 25 — dbt runs inside the Airflow container (isolated venv)
+**Status:** ✅ Phase 4 core pipeline complete — Iteration 26: dbt run/test wired into the DAG
 
 ## Roadmap
 ### Phase 1: Get data moving
@@ -37,12 +37,15 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 23: Pipeline Dockerized (Dockerfile, .dockerignore)
 - [x] Iteration 24: Airflow containerized (custom image, webserver, scheduler, Postgres via docker-compose)
 - [x] Iteration 25: dbt installed in an isolated venv inside the Airflow image, container profile via env vars, git added, pip timeouts hardened
-- [ ] Iteration 26: TBD (dbt run/test as DAG tasks)
+- [x] Iteration 26: dbt run + dbt test added as DAG tasks (full extract → load → transform → test chain)
+- [ ] Iteration 27: TBD (idempotent loads — fixing the raw table duplication gap)
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
 ## Data flow
 EskomSePush API → raw JSON (NDJSON) → BigQuery `raw` dataset → dbt staging (`stg_status`) → dbt mart (`mart_current_status`)
+
+Orchestrated end-to-end by Airflow: extract → load → dbt run → dbt test, daily.
 
 
 ## Environments
