@@ -1,8 +1,21 @@
 FROM apache/airflow:2.10.3
 
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+USER airflow
+
 COPY requirements.txt /requirements.txt
-RUN pip install --no-cache-dir -r /requirements.txt
+RUN pip install --no-cache-dir --default-timeout=100 --retries 10 -r /requirements.txt
+
+# dbt gets its own venv: its dependency tree conflicts with Airflow's
+RUN python -m venv /home/airflow/dbt-venv \
+    && /home/airflow/dbt-venv/bin/pip install --no-cache-dir dbt-bigquery==1.12.1
 
 COPY --chown=airflow:root pyproject.toml /opt/airflow/pyproject.toml
 COPY --chown=airflow:root src/ /opt/airflow/src/
 RUN pip install --no-cache-dir /opt/airflow
+
+COPY --chown=airflow:root sa_power_dbt/ /opt/airflow/sa_power_dbt/
+COPY --chown=airflow:root docker/dbt_profiles/ /opt/airflow/dbt_profiles/
+ENV DBT_PROFILES_DIR=/opt/airflow/dbt_profiles

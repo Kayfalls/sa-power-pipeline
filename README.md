@@ -2,7 +2,7 @@
 
 A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
 
-**Status:** 🚧 Iteration 24 — Airflow fully containerized via Docker Compose
+**Status:** 🚧 Iteration 25 — dbt runs inside the Airflow container (isolated venv)
 
 ## Roadmap
 ### Phase 1: Get data moving
@@ -36,7 +36,8 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 22: Retries (3x, 2min delay) + failure alert callback
 - [x] Iteration 23: Pipeline Dockerized (Dockerfile, .dockerignore)
 - [x] Iteration 24: Airflow containerized (custom image, webserver, scheduler, Postgres via docker-compose)
-- [ ] Iteration 25: TBD
+- [x] Iteration 25: dbt installed in an isolated venv inside the Airflow image, container profile via env vars, git added, pip timeouts hardened
+- [ ] Iteration 26: TBD (dbt run/test as DAG tasks)
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
@@ -52,25 +53,25 @@ This project uses two separate virtual environments due to dependency conflicts 
 ## Setup
 1. Copy `.env.example` to `.env` and add your EskomSePush API token, GCP project ID, and path to your GCP service account key.
 2. `pip install -r requirements.txt`
-3. 'pip install -e .'
-4. 'python src/sa_power_pipeline/fetch_status.py'
+3. `pip install -e .`
+4. `python src/sa_power_pipeline/fetch_status.py`
 
 ### Airflow
-1. 'export AIRFLOW_HOME=~/airflow'
-2. 'airflow webserver --port 8080' and 'airflow scheduler' (separate terminals)
-3. DAG: 'sa_power_pipeline', scheduled daiy
+1. `export AIRFLOW_HOME=~/airflow`
+2. `airflow webserver --port 8080` and `airflow scheduler` (separate terminals)
+3. DAG: `sa_power_pipeline`, scheduled daiy
 
 ### Docker
-1. 'docker build -t sa-power-pipeline .'
-2. 'docker run --rm --env-file .env -v /path/to/key.json:/app/credentials.json -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json sa-power-pipeline'
+1. `docker build -t sa-power-pipeline .`
+2. `docker run --rm --env-file .env -v /path/to/key.json:/app/credentials.json -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json sa-power-pipeline`
 
 ## Running tests
-1. 'pip install -r requirements-dev.txt'
-2. 'pytest -v'
+1. `pip install -r requirements-dev.txt`
+2. `pytest -v`
 
 Note to self:
 remember to activate the environment: 
-        'source .venv/bin/activate'
+        `source .venv/bin/activate`
 
 
 Verification code: WTC-QNYTS8NT
