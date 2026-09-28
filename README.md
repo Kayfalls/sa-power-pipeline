@@ -2,7 +2,7 @@
 
 A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
 
-**Status:** ✅ Phase 4 core pipeline complete — Iteration 26: dbt run/test wired into the DAG
+**Status:** ✅ Phase 4 core pipeline complete — Iteration 27: Idempotent loads via archiving
 
 ## Roadmap
 ### Phase 1: Get data moving
@@ -38,7 +38,7 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 24: Airflow containerized (custom image, webserver, scheduler, Postgres via docker-compose)
 - [x] Iteration 25: dbt installed in an isolated venv inside the Airflow image, container profile via env vars, git added, pip timeouts hardened
 - [x] Iteration 26: dbt run + dbt test added as DAG tasks (full extract → load → transform → test chain)
-- [ ] Iteration 27: TBD (idempotent loads — fixing the raw table duplication gap)
+- [x] Iteration 27: Idempotent loads (archive after successful load)
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
