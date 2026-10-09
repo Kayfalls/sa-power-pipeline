@@ -40,6 +40,9 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 26: dbt run + dbt test added as DAG tasks (full extract → load → transform → test chain)
 - [x] Iteration 27: Idempotent loads (archive after successful load)
 
+### Phase 5: Scale + polish
+- [x] Iteration 28: Incremental history model (merge strategy, deduplicated on a surrogate key; caught duplicate raw loads via uniqueness test)
+
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
 ## Data flow

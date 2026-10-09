@@ -13,3 +13,14 @@ models:
         description: Current load shedding stage
         tests:
           - not_null
+  - name: fct_status_history
+    description: Append-only history of load shedding status per region, one row per extraction run. Built incrementally.
+    columns: 
+      - name: status_key 
+        description: Surrogate key (region + extraction timestamp)
+        tests:
+          - not_null
+          - unique
+      - name: extracted_ts
+        tests:
+          - not_null
