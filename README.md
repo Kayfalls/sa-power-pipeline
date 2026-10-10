@@ -2,7 +2,7 @@
 
 A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
 
-**Status:** Iteration 29 — source freshness checks and stricter dbt tests
+**Status:** Iteration 30 — failures raise and alert to Discord
 
 ## Roadmap
 ### Phase 1: Get data moving
@@ -43,7 +43,8 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 ### Phase 5: Scale + polish
 - [x] Iteration 28: Incremental history model (merge strategy, deduplicated on a surrogate key; caught duplicate raw loads via uniqueness test)
 - [x] Iteration 29: Source freshness (warn 12h / error 36h) gating the DAG, accepted-values and completeness tests
-- [ ] Iteration 30: TBD (real failure alerting)
+- [ ] Iteration 30: Extraction raises on failed endpoints, Discord webhook alerts when a task exhausts its retries
+- [ ] Iteration 31: TBD (CI part 1)
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
@@ -55,6 +56,9 @@ Orchestrated end-to-end by Airflow: extract → load → dbt run → dbt test, d
 ## Data quality
 - Source freshness: raw tables must have a new pull within 36h (warning at 12h), otherwise the DAG halts before transforming
 - dbt tests: not_null/unique on keys, accepted values for `stage` (0–8), and a completeness check that every pull contains both regions
+
+## Alerting
+When any task fails after its retries, the pipelines posts to a Discord channel (task, Set 'DISCORD_WEBHOOK_URL' in '.env'. Without it, alerts are skipped and failures are only logged.)
 
 ## Environments
 This project uses two separate virtual environments due to dependency conflicts between Airflow and dbt:

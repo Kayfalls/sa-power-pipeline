@@ -11,6 +11,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 
+from sa_power_pipeline.alerts import send_discord_alert
 from sa_power_pipeline.fetch_status import main as extract_task
 from sa_power_pipeline.load_bigquery import load_all_raw_files as load_task
 
@@ -21,15 +22,25 @@ DBT_BIN = "/home/airflow/dbt-venv/bin/dbt"
 
 
 def alert_on_failure(context):
-    """Log a clear alert when a task exhausts its retries and fails."""
-    task_id = context["task_instance"].task_id
+    """Log and send a Discord alert when a task exhausts its retries."""
+    ti = context["task_instance"]
     dag_id = context["dag"].dag_id
-    execution_date = context["execution_date"]
+    run_time = context.get("logical_date")
+    error = str(context.get("exception", "unknown error"))[:500]
+
     logger.error(
         "ALERT: Task '%s' in DAG '%s' failed after all retries. Run: %s",
-        task_id,
+        ti.task_id,
         dag_id,
-        execution_date,
+        run_time,
+    )
+
+    send_discord_alert(
+        f"**ALERT: {dag_id} failed**\n"
+        f"Task: `{ti.task_id}`\n"
+        f"Run: {run_time}\n"
+        f"Error: {error}\n"
+        f"Logs: {ti.log_url}"
     )
 
 

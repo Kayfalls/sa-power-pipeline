@@ -79,13 +79,32 @@ def fetch_schedule(schedule_id: str, timestamp: str) -> dict[str, Any] | None:
     return data
 
 def main() -> None:
-    """Run one full pipeline pass: status, area, schedule. """
+    """Run one full extraction pass: status, area, schedule.
+
+    All three endpoints are attempted even if one fails, then the task
+    raises so Airflow retries it and the failure callback fires.
+    """
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     logger.info("Starting pipeline run: %s", timestamp)
-    fetch_status(timestamp)
-    fetch_area(AREA_ID, timestamp)
-    fetch_schedule(SCHEDULE_ID, timestamp)
+
+    results = {
+        "status": fetch_status(timestamp),
+        "area": fetch_area(AREA_ID, timestamp),
+        "schedule": fetch_schedule(SCHEDULE_ID, timestamp),
+    }
+
+    failed = [name for name, data in results.items() if data is None]
+    if failed:
+        raise RuntimeError(f"Extraction failed for: {', '.join(failed)}")
+
     logger.info("Pipeline run complete: %s", timestamp)
+    # """Run one full pipeline pass: status, area, schedule. """
+    # timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    # logger.info("Starting pipeline run: %s", timestamp)
+    # fetch_status(timestamp)
+    # fetch_area(AREA_ID, timestamp)
+    # fetch_schedule(SCHEDULE_ID, timestamp)
+    # logger.info("Pipeline run complete: %s", timestamp)
 
 if __name__ == "__main__":
     main()
