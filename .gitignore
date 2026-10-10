@@ -10,3 +10,5 @@ LICENSE
 postgres-db-volume/
 data/archive/
 data/archive/logs
+
+logs
