@@ -59,6 +59,12 @@ with DAG(
         python_callable=load_task,
     )
 
+    dbt_freshness = BashOperator(
+        task_id="dbt_source_freshness",
+        bash_command=f"{DBT_BIN} source freshness --project-dir {DBT_PROJECT_DIR}",
+        retries=0,
+    )
+
     dbt_run = BashOperator(
         task_id="dbt_run",
         bash_command=f"{DBT_BIN} run --project-dir {DBT_PROJECT_DIR}",
@@ -69,4 +75,4 @@ with DAG(
         bash_command=f"{DBT_BIN} test --project-dir {DBT_PROJECT_DIR}",
     )
 
-    extract >> load >> dbt_run >> dbt_test
+    extract >> load >> dbt_freshness >>dbt_run >> dbt_test
