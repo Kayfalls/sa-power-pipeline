@@ -8,4 +8,5 @@ venv/
 data/raw/
 LICENSE
 postgres-db-volume/
-data/archive/logs/
+data/archive/
+data/archive/logs
