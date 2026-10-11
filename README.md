@@ -4,7 +4,7 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
-**Status:** Iteration 30 — failures raise and alert to Discord
+**Status:** Iteration 32 — keyless dbt build in CI (Workload Identity Federation)
 
 ## Roadmap
 ### Phase 1: Get data moving
@@ -47,8 +47,11 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 29: Source freshness (warn 12h / error 36h) gating the DAG, accepted-values and completeness tests
 - [ ] Iteration 30: Extraction raises on failed endpoints, Discord webhook alerts when a task exhausts its retries
 - [x] Iteration 31: CI on every push/PR: ruff + pytest, dbt parse, Airflow image build (default branch renamed to main)
-- [ ] Iteration 32: TBD (CI part 2: dbt build against an isolated dataset)
+- [x] Iteration 32: dbt build in CI against as isolated `dbt_ci` dataset, authenticated with Workload Identity Federation (no stored keys)
+- [ ] Iteration 33: TBD (architecture diagram + README overhaul)
 
+## CI authentication
+Github Actions authenticates to BigQuery with Workload Identity Federation, so no credentials are stored. The `dbt-ci` service account can read `raw` and write only to `dbt_ci`, and the identity provider only accpets tokens from this repository.
 ## Data flow
 EskomSePush API → raw JSON (NDJSON) → BigQuery `raw` dataset → dbt staging (`stg_status`) → dbt mart (`mart_current_status`)
 
