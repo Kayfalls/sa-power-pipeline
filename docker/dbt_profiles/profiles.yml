@@ -9,3 +9,10 @@ sa_power_dbt:
       location: africa-south1
       threads: 4
       keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS') }}"
+    ci:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      dataset: dbt_ci
+      location: africa-south1
+      threads: 4
