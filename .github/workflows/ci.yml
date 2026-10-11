@@ -1,33 +1,109 @@
 name: CI
 
 on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
-    workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-    lint-and-test:
-        runs-on: ubuntu-latest
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-        steps:
-            - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
-            - name: set up python
-              uses: actions/setup-python@v6
-              with:
-                  python-version: '3.12'
-            
-            - name: install dependencies
-              run: |
-                pip install -r requirements.txt -r requirements-dev.txt
-                pip install -e .
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt -r requirements-dev.txt
+          pip install -e .
 
-            - name: lint with ruff
-              run:
-                ruff check .
-                
-            - name: Run tests
-              run:
-                pytest -v
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Run tests
+        run: pytest -v
+
+  dbt-parse:
+    runs-on: ubuntu-latest
+    env:
+      GCP_PROJECT_ID: ci-placeholder
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/placeholder-key.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dbt
+        run: pip install -r requirements-dev.txt
+
+      - name: Parse dbt project with the container profile
+        run: dbt parse --project-dir sa_power_dbt --profiles-dir docker/dbt_profiles
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build Airflow image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.airflow
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  dbt-build:
+    runs-on: ubuntu-latest
+    # OIDC tokens aren't available to pull requests from forks, so skip those
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    concurrency:
+      group: dbt-ci-dataset
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      GCP_PROJECT_ID: sa-power-pipeline
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dbt
+        run: pip install -r requirements-dev.txt
+
+      - name: Authenticate to Google Cloud (keyless)
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_CI_SERVICE_ACCOUNT }}
+
+      - name: dbt build into the isolated CI dataset
+        run: dbt build --target ci --project-dir sa_power_dbt --profiles-dir docker/dbt_profiles

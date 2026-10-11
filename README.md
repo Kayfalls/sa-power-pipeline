@@ -2,6 +2,8 @@
 
 A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
 
+![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
+
 **Status:** Iteration 30 — failures raise and alert to Discord
 
 ## Roadmap
@@ -44,9 +46,8 @@ A batch ELT pipeline tracking South African load shedding data — from raw API 
 - [x] Iteration 28: Incremental history model (merge strategy, deduplicated on a surrogate key; caught duplicate raw loads via uniqueness test)
 - [x] Iteration 29: Source freshness (warn 12h / error 36h) gating the DAG, accepted-values and completeness tests
 - [ ] Iteration 30: Extraction raises on failed endpoints, Discord webhook alerts when a task exhausts its retries
-- [ ] Iteration 31: TBD (CI part 1)
-
-![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
+- [x] Iteration 31: CI on every push/PR: ruff + pytest, dbt parse, Airflow image build (default branch renamed to main)
+- [ ] Iteration 32: TBD (CI part 2: dbt build against an isolated dataset)
 
 ## Data flow
 EskomSePush API → raw JSON (NDJSON) → BigQuery `raw` dataset → dbt staging (`stg_status`) → dbt mart (`mart_current_status`)
