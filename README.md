@@ -1,96 +1,126 @@
 # sa-power-pipeline
 
-A batch ELT pipeline tracking South African load shedding data — from raw API script to an orchestrated, tested, cloud-warehoused pipeline.
-
 ![CI](https://github.com/Kayfalls/sa-power-pipeline/actions/workflows/ci.yml/badge.svg)
 
-**Status:** Iteration 32 — keyless dbt build in CI (Workload Identity Federation)
+A data pipeline that collects South African load shedding data every day, stores it in the cloud, and turns it into clean, tested tables that a dashboard or app can use. It runs on a schedule with no manual steps, and it messages me on Discord when something breaks.
 
-## Roadmap
-### Phase 1: Get data moving
-- [x] Iteration 1: Repo setup
-- [x] Iteration 2: First API call
-- [x] Iteration 3: Timestamped raw dumps, quota tracking
-- [x] Iteration 4: Basic error handling (401, 429, unexpected codes)
-- [x] Iteration 5: Area Information endpoint (hardcoded area)
-- [x] Iteration 6: Schedule Information endpoint
+## What it does
 
-### Phase 2: Add discipline
-- [x] Iteration 7: Refactored into functions ('fetch_status', 'fetch_area', 'fetch_schedule', 'main')
-- [x] Iteration 8: Structured logging (INFO/WARNING/ERROR levels, timestamps)
-- [x] Iteration 9: First unit tests (pytest, mocked responses, no live API calls)
-- [x] Iteration 10: Proper src/ package layout, installable via pyproject.toml
-- [x] Iteration 11: GitHub Actions CI (ruff lint + pytest on every push)
-- [x] Iteration 12: Externalized config module, type hints, docstrings
+1. **Collects** load shedding status, area details and outage schedules from the EskomSePush API.
+2. **Stores** every raw response in Google BigQuery, exactly as received, so history is never lost.
+3. **Checks** that the data is fresh, and stops if the API has gone quiet.
+4. **Transforms** the data with dbt into tables that answer plain questions: what stage is load shedding at right now, and how has it changed over time?
+5. **Tests** the results automatically, and sends a Discord alert if any step fails.
 
-### Phase 3: Real warehouse (BigQuery + dbt)
-- [x] Iteration 13: GCP project  service account setup, first raw JSON load into BigQuery
-- [x] Iteration 14: NDJSON format, generalized loader for status/area/schedule tables
-- [x] Iteration 15: Combined extract + load into one 'run_pipeline.py' entrypoint
-- [x] Iteration 16: dbt project initialized, connected to BigQuery
-- [x] Iteration 17: stg_status staging model + schema tests
-- [x] Iteration 18: extracted_at metadata, schema evolution handling
-- [x] Iteration 19: mart_current_status model, unique/not_null tests, dbt docs
+```mermaid
+flowchart LR
+    API["EskomSePush API"]
+    subgraph DAG["Airflow in Docker: runs daily, retries 3 times"]
+        direction LR
+        A["Extract<br/>Python"] --> B["Load<br/>to BigQuery"] --> C["Freshness<br/>gate"] --> D["dbt run<br/>staging and marts"] --> E["dbt test"]
+    end
+    API --> A
+    B --> RAW[("BigQuery raw")]
+    D --> MODELS[("BigQuery models")]
+    DAG -. "if a task fails" .-> DISCORD["Discord alert"]
+```
 
-### Phase 4: Orchestrate + containerize
-- [x] Iteration 20: First Airflow DAG, running in isolated venv, daily schedule, manual trigger verified
-- [x] Iteration 21: Split into extract_from_eskomsepush and load_to_bigquery tasks
-- [x] Iteration 22: Retries (3x, 2min delay) + failure alert callback
-- [x] Iteration 23: Pipeline Dockerized (Dockerfile, .dockerignore)
-- [x] Iteration 24: Airflow containerized (custom image, webserver, scheduler, Postgres via docker-compose)
-- [x] Iteration 25: dbt installed in an isolated venv inside the Airflow image, container profile via env vars, git added, pip timeouts hardened
-- [x] Iteration 26: dbt run + dbt test added as DAG tasks (full extract → load → transform → test chain)
-- [x] Iteration 27: Idempotent loads (archive after successful load)
+A poster version of this diagram is in [`docs/architecture.png`](docs/architecture.png).
 
-### Phase 5: Scale + polish
-- [x] Iteration 28: Incremental history model (merge strategy, deduplicated on a surrogate key; caught duplicate raw loads via uniqueness test)
-- [x] Iteration 29: Source freshness (warn 12h / error 36h) gating the DAG, accepted-values and completeness tests
-- [ ] Iteration 30: Extraction raises on failed endpoints, Discord webhook alerts when a task exhausts its retries
-- [x] Iteration 31: CI on every push/PR: ruff + pytest, dbt parse, Airflow image build (default branch renamed to main)
-- [x] Iteration 32: dbt build in CI against as isolated `dbt_ci` dataset, authenticated with Workload Identity Federation (no stored keys)
-- [ ] Iteration 33: TBD (architecture diagram + README overhaul)
+## What this project shows
 
-## CI authentication
-Github Actions authenticates to BigQuery with Workload Identity Federation, so no credentials are stored. The `dbt-ci` service account can read `raw` and write only to `dbt_ci`, and the identity provider only accpets tokens from this repository.
-## Data flow
-EskomSePush API → raw JSON (NDJSON) → BigQuery `raw` dataset → dbt staging (`stg_status`) → dbt mart (`mart_current_status`)
+| Skill | Where to look |
+| --- | --- |
+| Pipeline orchestration | An Airflow DAG with five tasks, a daily schedule, 3 retries per task and failure alerts: [`dags/sa_power_pipeline_dag.py`](dags/sa_power_pipeline_dag.py) |
+| ELT with dbt | Staging and mart models, plus an incremental history table: [`sa_power_dbt/`](sa_power_dbt/) |
+| Cloud data warehouse | BigQuery with separate datasets for raw data, development and CI |
+| Data quality | A freshness gate (warns at 12 hours, fails at 36), tests on keys, allowed values and completeness, and loads that never repeat a file |
+| Containers | A custom Airflow image with dbt in its own isolated environment, run with Docker Compose: [`docker/`](docker/) |
+| CI/CD and security | GitHub Actions runs lint, tests, a dbt parse, a Docker build and a real dbt build in BigQuery, logging in with Workload Identity Federation so no credentials are stored: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
+| Honest engineering | Built in small steps, with every bug and fix written down: [`docs/BUILD_LOG.md`](docs/BUILD_LOG.md) |
 
-Orchestrated end-to-end by Airflow: extract → load → dbt run → dbt test, daily.
+## Why load shedding
 
-## Data quality
-- Source freshness: raw tables must have a new pull within 36h (warning at 12h), otherwise the DAG halts before transforming
-- dbt tests: not_null/unique on keys, accepted values for `stage` (0–8), and a completeness check that every pull contains both regions
+Load shedding is part of daily life in South Africa, and the data behind it is awkward in useful ways: nested API responses, a free tier of 50 requests a day, and schedules that change. Building against real constraints like these is the point of the project.
 
-## Alerting
-When any task fails after its retries, the pipelines posts to a Discord channel (task, Set 'DISCORD_WEBHOOK_URL' in '.env'. Without it, alerts are skipped and failures are only logged.)
+## How the data is organised
 
-## Environments
-This project uses two separate virtual environments due to dependency conflicts between Airflow and dbt:
-- `.venv` — pipeline code, dbt, testing, linting
-- `.venv-airflow` — Airflow only (also has the pipeline package installed via `pip install -e .` so DAGs can import it)
+| Layer | Dataset | What is in it |
+| --- | --- | --- |
+| Raw | `raw` | Status, area and schedule responses as the API sent them, one row per pull. Rows are only ever added. |
+| Staging | `dbt_dev` | `stg_status`: one row per region per pull, unpacked from the nested response. |
+| Marts | `dbt_dev` | `mart_current_status`: the latest stage for each region. `fct_status_history`: the full history, built incrementally, one row per region per pull. |
 
-## Setup
-1. Copy `.env.example` to `.env` and add your EskomSePush API token, GCP project ID, and path to your GCP service account key.
-2. `pip install -r requirements.txt`
-3. `pip install -e .`
-4. `python src/sa_power_pipeline/fetch_status.py`
+## What one daily run does
 
-### Airflow
-1. `export AIRFLOW_HOME=~/airflow`
-2. `airflow webserver --port 8080` and `airflow scheduler` (separate terminals)
-3. DAG: `sa_power_pipeline`, scheduled daiy
+| Task | What it does |
+| --- | --- |
+| `extract_from_eskomsepush` | Calls the status, area and schedule endpoints. Fails loudly if any call fails, so retries and alerts trigger. |
+| `load_to_bigquery` | Appends the new raw files to BigQuery, then archives them so they are never loaded twice. |
+| `dbt_source_freshness` | Stops the run if the newest raw data is too old, so stale data never reaches the marts. |
+| `dbt_run` | Builds the staging and mart models. |
+| `dbt_test` | Runs the dbt tests on the result. |
 
-### Docker
-1. `docker build -t sa-power-pipeline .`
-2. `docker run --rm --env-file .env -v /path/to/key.json:/app/credentials.json -e GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json sa-power-pipeline`
+A run uses 3 of the 50 daily API requests.
 
-## Running tests
-1. `pip install -r requirements-dev.txt`
-2. `pytest -v`
+## Decisions worth explaining
 
-Note to self:
-remember to activate the environment: 
-        `source .venv/bin/activate`
+- **Raw data is append-only.** Uniqueness is enforced in dbt, not by deleting raw rows. When the history model's uniqueness test first failed, it exposed duplicate loads from earlier in the build, and the model now removes them.
+- **Extraction fails loudly.** An API error used to be logged and ignored, which left the task green. It now raises, so retries, alerts and the freshness gate can do their jobs.
+- **dbt has its own environment inside the Airflow image.** Their dependencies conflict, so keeping them apart is the clean fix.
+- **CI uses Workload Identity Federation.** The CI service account can read `raw` and write only to a separate `dbt_ci` dataset, and the identity provider only accepts tokens from this repository.
 
+## Run it yourself
 
-Verification code: WTC-QNYTS8NT
+You need Docker, an [EskomSePush](https://esp.info) API token, and a Google Cloud project with BigQuery datasets named `raw` and `dbt_dev`. The profiles use the `africa-south1` region, so change `location` in `docker/dbt_profiles/profiles.yml` if yours differs.
+
+```bash
+cp .env.example .env        # add your token, project ID, key file path and Discord webhook
+docker compose build
+docker compose up airflow-init
+docker compose up -d
+```
+
+Open <http://localhost:8080> (local login `admin` / `admin`), un-pause `sa_power_pipeline` and trigger it.
+
+For development without Docker:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+pip install -e .
+ruff check . && pytest -v
+```
+
+## Repo layout
+
+```
+dags/                       Airflow DAG: extract, load, freshness, dbt run, dbt test
+src/sa_power_pipeline/
+    fetch_status.py         calls the EskomSePush API
+    load_bigquery.py        loads raw files into BigQuery
+    alerts.py               Discord failure alerts
+    config.py               settings
+    run_pipeline.py         runs extract and load outside Airflow
+sa_power_dbt/               dbt project: sources, staging, marts, tests
+tests/                      unit tests
+docker/                     Airflow image and the dbt profile used in containers
+.github/workflows/          CI
+docs/                       architecture diagram and build log
+```
+
+## Limits and what comes next
+
+- It tracks one area (Fourways, Johannesburg), set in `config.py`.
+- Only the status data is modelled in dbt so far. Area and schedule responses are loaded into `raw` but not yet modelled.
+- There is no dashboard yet. The mart tables are ready for one.
+- It runs in Docker Compose on my machine, not on a cloud host.
+- I considered Property24 as a second source and dropped it, because it has no public API and the only access is scraping. A documented source is a better fit for this project.
+
+## Build log
+
+This project was built in small steps, one commit at a time, starting from a rough script. [`docs/BUILD_LOG.md`](docs/BUILD_LOG.md) lists every step, what went wrong and what I learned.
+
+## License
+
+MIT. Built by Kabelo Maile.
